@@ -13,7 +13,7 @@ class ProductController extends Controller
     public function index()
     {
         $product = Product::all();
-        return view('product.index');
+        return view('product.index', compact('product'));
     }
 
     /**
@@ -47,7 +47,8 @@ class ProductController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $product = Product::findorfail(($id));
+        return view('product.show', compact('product'));
     }
 
     /**
@@ -55,7 +56,8 @@ class ProductController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $product = Product::findorfail(($id));
+        return view('product.edit', compact('product'));
     }
 
     /**
@@ -63,7 +65,17 @@ class ProductController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $validate = $request->validate([
+            'name' => 'required|string|max:255,' . $id,
+            'description' => 'required|string|max:255',
+            'price' => 'required|integer|min:1',
+            'image' => 'required|string|max:255',
+
+        ]);
+
+        $product = Product::findorfail(($id));
+        $product->update($validate);
+        return redirect()->route('product.index')->with('success', 'Product updated successfully');
     }
 
     /**
@@ -71,6 +83,8 @@ class ProductController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $product = Product::findorfail(($id));
+        $product->delete();
+        return redirect()->route('product.index')->with('success', 'Product deleted successfully');
     }
 }
