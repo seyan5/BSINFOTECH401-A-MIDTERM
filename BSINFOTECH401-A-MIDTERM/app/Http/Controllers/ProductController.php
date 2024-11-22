@@ -1,7 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
@@ -12,8 +13,8 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $product = Product::all();
-        return view('product.index', compact('product'));
+        $products = Product::all();
+        return view('product.index', compact('products'));
     }
 
     /**
@@ -29,25 +30,34 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        $validate = $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string|max:255',
             'price' => 'required|integer|min:1',
-            'image' => 'required|string|max:255',
-
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048', // Validating the image
         ]);
 
-        Product::create($validate);
+        // Handle the file upload
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('images', 'public'); // Store in public/images directory
+            $validated['image'] = $imagePath;
+        }
+
+        // Create the product with the validated data
+        Product::create($validated);
 
         return redirect()->route('product.index')->with('success', 'Product created successfully');
     }
+
+
+
 
     /**
      * Display the specified resource.
      */
     public function show(string $id)
     {
-        $product = Product::findorfail(($id));
+        $product = Product::findOrFail($id);
         return view('product.show', compact('product'));
     }
 
@@ -56,35 +66,59 @@ class ProductController extends Controller
      */
     public function edit(string $id)
     {
-        $product = Product::findorfail(($id));
+        // Fetch the product by ID or fail if not found
+        $product = Product::findOrFail($id);
+
+        // Return the view with the product data
         return view('product.edit', compact('product'));
     }
+
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, string $id): RedirectResponse
     {
-        $validate = $request->validate([
-            'name' => 'required|string|max:255,' . $id,
-            'description' => 'required|string|max:255',
-            'price' => 'required|integer|min:1',
-            'image' => 'required|string|max:255',
-
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'price' => 'required|integer',
+            'description' => 'required|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240', // Validate the image
         ]);
+    
+        $product = Product::find($id);
+    
+        // Check if a new image was uploaded
+        if ($request->hasFile('image')) {
+            // Delete the old image if it exists
+            if ($product->image) {
+                \Storage::disk('public')->delete($product->image);
+            }
+    
+            // Store the new image
+            $validated['image'] = $request->file('image')->store('images', 'public');
+        } else {
+            // If no image was uploaded, do not include the image field in the update
+            unset($validated['image']);
+        }
+    
+        // Update the product with the validated data
+        $product->update($validated);
 
-        $product = Product::findorfail(($id));
-        $product->update($validate);
-        return redirect()->route('product.index')->with('success', 'Product updated successfully');
+        return redirect()->route('product.index')->with('success', 'Product updated successfully.');
     }
+    
+    
+
+
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
     {
-        $product = Product::findorfail(($id));
-        $product->delete();
+        Product::destroy($id);
+
         return redirect()->route('product.index')->with('success', 'Product deleted successfully');
     }
 }
