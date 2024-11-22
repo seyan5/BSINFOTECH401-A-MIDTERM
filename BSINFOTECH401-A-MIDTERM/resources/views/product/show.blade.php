@@ -51,7 +51,7 @@
 <body>
     <div class="container mt-4">
         <h1><i class="fas fa-eye"></i> {{$product->name}}</h1>
-        <img src="{{$product->image}}" alt="Product Image" class="product-image">
+        <img src="{{ asset('storage/' . $product->image) }}" alt="Product Image" class="product-image">
         <p class="description"><strong>Description: </strong>{{$product->description}}</p>
         <p class="price"><strong>Price: </strong>${{number_format($product->price, 2)}}</p>
         

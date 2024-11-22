@@ -52,16 +52,16 @@
             transform: scale(1.1);
         }
     </style>
-    <title>DASHBOARD</title>
+<title>DASHBOARD</title>
 </head>
 
 <body>
     <div class="container mt-5">
         <h1><i class="fas fa-box"></i> Products</h1>
-        <a href="{{route('product.create')}}" class="btn btn-success mb-3"><i class="fas fa-plus-circle"></i> Add Product</a>
+        <a href="{{ route('product.create') }}" class="btn btn-success mb-3"><i class="fas fa-plus-circle"></i> Add Product</a>
         
         @if (session('success'))
-            <div class="alert alert-success">{{session('success')}}</div>
+            <div class="alert alert-success">{{ session('success') }}</div>
         @endif
 
         <table class="table table-striped">
@@ -77,17 +77,19 @@
             </thead>
 
             <tbody>
-                @foreach ($product as $product)
+                @foreach ($products as $product)
                     <tr>
-                        <td>{{$product->id}}</td>
-                        <td>{{$product->name}}</td>
-                        <td>{{$product->description}}</td>
-                        <td>P{{number_format($product->price, 2)}}</td>
-                        <td><img src="{{$product->image}}" alt="Product Image" class="product-image"></td>
+                        <td>{{ $product->id }}</td>
+                        <td>{{ $product->name }}</td>
+                        <td>{{ $product->description }}</td>
+                        <td>P{{ number_format($product->price, 2) }}</td>
+                        <td>
+                            <img src="{{ asset('storage/' . $product->image) }}" alt="Product Image" class="product-image" style="width: 100px; height: 100px;">
+                        </td>
                         <td>
                             <a href="{{ route('product.show', $product->id) }}" class="btn btn-primary"><i class="fas fa-eye"></i> View</a>
                             <a href="{{ route('product.edit', $product->id) }}" class="btn btn-info"><i class="fas fa-edit"></i> Edit</a>
-                            <form action="{{route('product.destroy', $product->id)}}" method="post" style="display:inline;">
+                            <form action="{{ route('product.destroy', $product->id) }}" method="post" style="display:inline;">
                                 <input type="hidden" name="_method" value="DELETE">
                                 <input type="hidden" name="_token" value="{{ csrf_token() }}">
                                 <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i> Delete</button>
@@ -99,7 +101,4 @@
         </table>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-2XzM9cQ8bQ6kZz6+5eFh3Ygk3YxZ3Xh6j6R3c4P5b5LQ0g5m+q0P7m8z6g5Z5n3" crossorigin="anonymous"></script>
-</body>
-
-</html>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js
